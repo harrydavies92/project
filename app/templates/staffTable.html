@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Staff Members</title>
+  </head>
+  <body>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <h1>Staff Members</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Max Load</th>
+          <th>Current Load</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in staff %}
+        <tr>
+          <td>{{ member.id }}</td>
+          <td>{{ member.name }}</td>
+          <td>{{ member.max_load }}</td>
+          <td>{{ member.current_load }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>

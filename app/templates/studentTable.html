@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Students</title>
+  </head>
+  <body>
+    <h1>Students</h1>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Degree</th>
+        <th>Code 1</th>
+        <th>Title 1</th>
+        <th>Reason 1</th>
+        <th>Code 2</th>
+        <th>Title 2</th>
+        <th>Reason 2</th>
+        <th>Code 3</th>
+        <th>Title 3</th>
+        <th>Reason 3</th>
+        <th>Code 4</th>
+        <th>Title 4</th>
+        <th>Reason 4</th>
+        <th>Allocated Code</th>
+        <th>Allocated Staff</th>
+      </tr>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.username }}</td>
+        <td>{{ student.degree }}</td>
+        <td>{{ student.code1 }}</td>
+        <td>{{ student.title1 }}</td>
+        <td>{{ student.reason1 }}</td>
+        <td>{{ student.code2 }}</td>
+        <td>{{ student.title2 }}</td>
+        <td>{{ student.reason2 }}</td>
+        <td>{{ student.code3 }}</td>
+        <td>{{ student.title3 }}</td>
+        <td>{{ student.reason3 }}</td>
+        <td>{{ student.code4 }}</td>
+        <td>{{ student.title4 }}</td>
+        <td>{{ student.reason4 }}</td>
+        <td>{{ student.allocated_code }}</td>
+        <td>{{ student.allocated_staff }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
