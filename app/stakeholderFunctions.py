@@ -3,8 +3,7 @@
 
 from .models import Student, Staff, Project
 
-# This function takes a code as input and returns the staff member associated with that code
-def staffForCode( code ):
+def normaliseCode(code):
 	# Normalize the input code by removing any non-alphanumeric characters and converting to uppercase
 	if code[0].isdigit():
 		if "." in code:
@@ -17,7 +16,18 @@ def staffForCode( code ):
 
 	code = normed.strip().upper()
 
-	for title in Student.query.all():
+	# Hardcoding out some common mistakes
+	if code==("W01"): code = "SW01"
+	if code==("COHN1")	: code = "COHN01"
+	if code==("0AJ02")	: code = "OAJ02"
+	if code==("ALDER07")	: code = "ADLER07"
+	if code==("HE07")	: code = "HW07"
+	if code==("HACO2")	: code = "HAC02"
+	if code==("DHA02")	: code = "DAH02"
+
+	return code
+
+def staffForCode(code):
 
 	# 'OWN' projects have no staff member.
 	if code.lower().startswith("own")	: return "<unknown>"
@@ -71,10 +81,17 @@ def staffForCode( code ):
 	if code.lower().startswith("sa")	: return "Sharib Ali"
 	if code.lower().startswith("mc")	: return "Martin Callaghan"
 
+	if code.lower().startswith("ml")	: return "Matteo Leonetti"
+	if code.lower().startswith("mh")	: return "Matthew Hubbard"
+
 	# Hard coding out some common mistakes
 	if code.lower().startswith("dha")	: return "David Head"
 	if code.lower().startswith("0aj")	: return "Owen Johnson"
 	if code.lower().startswith("w01")	: return "Sam Wilson"
 	if code.lower().startswith("he07")	: return "He Wang"
+
+	# Hard coding out some titles that were mixed up with codes
+	if code.lower().startswith("serverless")	: return "Karim Djemame"
+	if code.lower().startswith("wearable")	: return "Vania Dimitrova"
 
 	return (code)
