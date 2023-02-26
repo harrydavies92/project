@@ -1,9 +1,7 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Students</title>
-  </head>
-  <body>
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %} Students {% endblock %}
+{% block content %}
     <h1>Students</h1>
     <table id="students-table">
       <tr>
@@ -13,18 +11,12 @@
         <th>Degree</th>
         <th>Code 1</th>
         <th>Title 1</th>
-        <th>Reason 1</th>
         <th>Code 2</th>
         <th>Title 2</th>
-        <th>Reason 2</th>
         <th>Code 3</th>
         <th>Title 3</th>
-        <th>Reason 3</th>
         <th>Code 4</th>
         <th>Title 4</th>
-        <th>Reason 4</th>
-        <th>Allocated Code</th>
-        <th>Allocated Staff</th>
       </tr>
       {% for student in students %}
       <tr>
@@ -34,18 +26,12 @@
         <td contenteditable="true">{{ student.degree }}</td>
         <td contenteditable="true">{{ student.code1 }}</td>
         <td contenteditable="true">{{ student.title1 }}</td>
-        <td contenteditable="true">{{ student.reason1 }}</td>
         <td contenteditable="true">{{ student.code2 }}</td>
         <td contenteditable="true">{{ student.title2 }}</td>
-        <td contenteditable="true">{{ student.reason2 }}</td>
         <td contenteditable="true">{{ student.code3 }}</td>
         <td contenteditable="true">{{ student.title3 }}</td>
-        <td contenteditable="true">{{ student.reason3 }}</td>
         <td contenteditable="true">{{ student.code4 }}</td>
         <td contenteditable="true">{{ student.title4 }}</td>
-        <td contenteditable="true">{{ student.reason4 }}</td>
-        <td contenteditable="true">{{ student.allocated_code }}</td>
-        <td contenteditable="true">{{ student.allocated_staff }}</td>
       </tr>
       {% endfor %}
     </table>
@@ -65,18 +51,12 @@
           "degree": cells[3].textContent,
           "code1": cells[4].textContent,
           "title1": cells[5].textContent,
-          "reason1": cells[6].textContent,
-          "code2": cells[7].textContent,
-          "title2": cells[8].textContent,
-          "reason2": cells[9].textContent,
-          "code3": cells[10].textContent,
-          "title3": cells[11].textContent,
-          "reason3": cells[12].textContent,
-          "code4": cells[13].textContent,
-          "title4": cells[14].textContent,
-          "reason4": cells[15].textContent,
-          "allocated_code": cells[16].textContent,
-          "allocated_staff": cells[17].textContent
+          "code2": cells[6].textContent,
+          "title2": cells[7].textContent,
+          "code3": cells[8].textContent,
+          "title3": cells[9].textContent,
+          "code4": cells[10].textContent,
+          "title4": cells[11].textContent,
         };
         data.push(rowData);
       }
@@ -94,5 +74,4 @@
     }
     </script>
     <button onclick="window.location='/students/refresh'">Refresh</button>
-  </body>
-</html>
+{% endblock %}

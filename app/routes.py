@@ -98,10 +98,11 @@ def refresh_staff():
     all_codes = list(all_codes)
 
     for code in all_codes:
-        if Staff.query.filter_by(name=code).first() is None:
-            staff_member = Staff(name=code, max_load=10, current_load=0)
-            db.session.add(staff_member)
-            db.session.commit()
+        if code != "":
+            if Staff.query.filter_by(name=code).first() is None:
+                staff_member = Staff(name=code, max_load=10, current_load=0)
+                db.session.add(staff_member)
+                db.session.commit()
 
     return redirect(url_for('staff'))
 

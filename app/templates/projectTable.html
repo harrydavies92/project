@@ -1,9 +1,7 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Projects</title>
-  </head>
-  <body>
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %} Projects {% endblock %}
+{% block content %}
     <h1>Projects</h1>
     <table id="projects-table">
       <tr>
@@ -12,7 +10,6 @@
         <th>Title</th>
         <th>Staff Member</th>
         <th>Max Load</th>
-        <th>Current Load</th>
         <th>Popularity</th>
       </tr>
       {% for project in projects %}
@@ -22,7 +19,6 @@
         <td contenteditable="true">{{ project.title }}</td>
         <td contenteditable="true">{{ project.staff_member }}</td>
         <td contenteditable="true">{{ project.max_load }}</td>
-        <td>{{ project.current_load }}</td>
         <td>{{ project.popularity }}</td>
       </tr>
       {% endfor %}
@@ -42,7 +38,6 @@
           "title": cells[2].textContent,
           "staff_member": cells[3].textContent,
           "max_load": cells[4].textContent,
-          "current_load": cells[5].textContent,
           "popularity": cells[6].textContent
         };
         data.push(rowData);
@@ -61,5 +56,4 @@
     }
     </script>
     <button onclick="window.location='/projects/refresh'">Refresh</button>
-  </body>
-</html>
+{% endblock %}

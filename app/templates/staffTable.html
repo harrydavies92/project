@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Staff Members</title>
-  </head>
-  <body>
+{% extends 'base.html' %}
+{% block title %} Staff {% endblock %}
+{% block content %}
     <h1>Staff Members</h1>
     <table id="staff-table">
       <thead>
@@ -11,7 +9,6 @@
           <th>ID</th>
           <th>Name</th>
           <th>Max Load</th>
-          <th>Current Load</th>
         </tr>
       </thead>
       <tbody>
@@ -20,7 +17,6 @@
           <td>{{ member.id }}</td>
           <td contenteditable="true">{{ member.name }}</td>
           <td contenteditable="true">{{ member.max_load }}</td>
-          <td contenteditable="true">{{ member.current_load }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -37,8 +33,7 @@
         var rowData = {
           "id": cells[0].textContent,
           "name": cells[1].textContent,
-          "max_load": cells[2].textContent,
-          "current_load": cells[3].textContent,
+          "max_load": cells[2].textContent
         };
         data.push(rowData);
       }
@@ -56,5 +51,4 @@
     }
     </script>
     <button onclick="window.location='/staff/refresh'">Refresh</button>
-  </body>
-</html>
+{% endblock %}
