@@ -1,24 +1,65 @@
-<table>
-  <thead>
-    <tr>
-      <th>Code</th>
-      <th>Title</th>
-      <th>Staff Member</th>
-      <th>Max Load</th>
-      <th>Current Load</th>
-      <th>Popularity</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for project in projects %}
-    <tr>
-      <td>{{ project.code }}</td>
-      <td>{{ project.title }}</td>
-      <td>{{ project.staff_member }}</td>
-      <td>{{ project.max_load }}</td>
-      <td>{{ project.current_load }}</td>
-      <td>{{ project.popularity }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!doctype html>
+<html>
+  <head>
+    <title>Projects</title>
+  </head>
+  <body>
+    <h1>Projects</h1>
+    <table id="projects-table">
+      <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Title</th>
+        <th>Staff Member</th>
+        <th>Max Load</th>
+        <th>Current Load</th>
+        <th>Popularity</th>
+      </tr>
+      {% for project in projects %}
+      <tr>
+        <td>{{ project.id }}</td>
+        <td contenteditable="true">{{ project.code }}</td>
+        <td contenteditable="true">{{ project.title }}</td>
+        <td contenteditable="true">{{ project.staff_member }}</td>
+        <td contenteditable="true">{{ project.max_load }}</td>
+        <td>{{ project.current_load }}</td>
+        <td>{{ project.popularity }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button onclick="save()">Save</button>
+    <script>
+    function save() {
+      var table = document.getElementById("projects-table");
+      var rows = table.getElementsByTagName("tr");
+      var data = [];
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var rowData = {
+          "id": cells[0].textContent,
+          "code": cells[1].textContent,
+          "title": cells[2].textContent,
+          "staff_member": cells[3].textContent,
+          "max_load": cells[4].textContent,
+          "current_load": cells[5].textContent,
+          "popularity": cells[6].textContent
+        };
+        data.push(rowData);
+      }
+
+      // Send data to server using AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/projects/update", true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          console.log(xhr.responseText);
+        }
+      };
+      xhr.send(JSON.stringify(data));
+    }
+    </script>
+    <button onclick="window.location='/projects/refresh'">Refresh</button>
+  </body>
+</html>

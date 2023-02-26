@@ -5,7 +5,7 @@
   </head>
   <body>
     <h1>Students</h1>
-    <table>
+    <table id="students-table">
       <tr>
         <th>ID</th>
         <th>Name</th>
@@ -29,25 +29,70 @@
       {% for student in students %}
       <tr>
         <td>{{ student.id }}</td>
-        <td>{{ student.name }}</td>
-        <td>{{ student.username }}</td>
-        <td>{{ student.degree }}</td>
-        <td>{{ student.code1 }}</td>
-        <td>{{ student.title1 }}</td>
-        <td>{{ student.reason1 }}</td>
-        <td>{{ student.code2 }}</td>
-        <td>{{ student.title2 }}</td>
-        <td>{{ student.reason2 }}</td>
-        <td>{{ student.code3 }}</td>
-        <td>{{ student.title3 }}</td>
-        <td>{{ student.reason3 }}</td>
-        <td>{{ student.code4 }}</td>
-        <td>{{ student.title4 }}</td>
-        <td>{{ student.reason4 }}</td>
-        <td>{{ student.allocated_code }}</td>
-        <td>{{ student.allocated_staff }}</td>
+        <td contenteditable="true">{{ student.name }}</td>
+        <td contenteditable="true">{{ student.username }}</td>
+        <td contenteditable="true">{{ student.degree }}</td>
+        <td contenteditable="true">{{ student.code1 }}</td>
+        <td contenteditable="true">{{ student.title1 }}</td>
+        <td contenteditable="true">{{ student.reason1 }}</td>
+        <td contenteditable="true">{{ student.code2 }}</td>
+        <td contenteditable="true">{{ student.title2 }}</td>
+        <td contenteditable="true">{{ student.reason2 }}</td>
+        <td contenteditable="true">{{ student.code3 }}</td>
+        <td contenteditable="true">{{ student.title3 }}</td>
+        <td contenteditable="true">{{ student.reason3 }}</td>
+        <td contenteditable="true">{{ student.code4 }}</td>
+        <td contenteditable="true">{{ student.title4 }}</td>
+        <td contenteditable="true">{{ student.reason4 }}</td>
+        <td contenteditable="true">{{ student.allocated_code }}</td>
+        <td contenteditable="true">{{ student.allocated_staff }}</td>
       </tr>
       {% endfor %}
     </table>
+    <button onclick="save()">Save</button>
+    <script>
+    function save() {
+      var table = document.getElementById("students-table");
+      var rows = table.getElementsByTagName("tr");
+      var data = [];
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var rowData = {
+          "id": cells[0].textContent,
+          "name": cells[1].textContent,
+          "username": cells[2].textContent,
+          "degree": cells[3].textContent,
+          "code1": cells[4].textContent,
+          "title1": cells[5].textContent,
+          "reason1": cells[6].textContent,
+          "code2": cells[7].textContent,
+          "title2": cells[8].textContent,
+          "reason2": cells[9].textContent,
+          "code3": cells[10].textContent,
+          "title3": cells[11].textContent,
+          "reason3": cells[12].textContent,
+          "code4": cells[13].textContent,
+          "title4": cells[14].textContent,
+          "reason4": cells[15].textContent,
+          "allocated_code": cells[16].textContent,
+          "allocated_staff": cells[17].textContent
+        };
+        data.push(rowData);
+      }
+
+      // Send data to server using AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/students/update", true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          console.log(xhr.responseText);
+        }
+      };
+      xhr.send(JSON.stringify(data));
+    }
+    </script>
+    <button onclick="window.location='/students/refresh'">Refresh</button>
   </body>
 </html>
