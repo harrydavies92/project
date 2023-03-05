@@ -15,22 +15,22 @@ import math
 
 
 class autoAllocate:
-	
-	
+
+
 	#
 	#MARK: Penalties and energy calculations.
 	#
-	
+
 	# The current energy.
 	@classmethod
 	def energy( cls, students, staff, projects ):
 
 		E = 0.0
 
-		# Increment energy for student-related penalties.		
+		# Increment energy for student-related penalties.
 		for student in students:
 			index = student.assignedIndex
-			
+
 			# If not assigned project yet, increment the energy and move to the next student.
 			if student.assignedIndex == -1:
 				E += cls.E_noSupervisor()
@@ -45,7 +45,7 @@ class autoAllocate:
 
 			if proposer.casefold()!="<none>".casefold() and proposer.casefold()!=student.supervisor.casefold():
 				E += cls.E_wrongSupervisor()
-			
+
 		# Apply penalties for members of staff taking on more students than their load suggests.
 		# (Can negotiate with staff for e.g. reduced assessment load and/or reduced masters projects).
 		# Penalty proportional to their maximum.
@@ -60,7 +60,7 @@ class autoAllocate:
 			maxStud, actStud = project["max"], len(project["allocated"])
 			if actStud > maxStud:
 				E += cls.E_excessStudents() * ( actStud - maxStud )
-		
+
 		# Return with the total.
 		return E
 
@@ -69,17 +69,17 @@ class autoAllocate:
 	def E_preference( cls ):
 		"""Absolute energy for each preference allocated to a student below their first."""
 		return 0.25
-	
+
 	@classmethod
 	def E_wrongSupervisor( cls ):
 		"""Absolute energy for supervisor not being the proposer of a project, when that is allowed."""
 		return 0.3
-		
+
 	@classmethod
 	def E_excessSupervising( cls ):
 		"""Relative energy for staff being assigned too many sudents, relative to their nominal maximum load."""
 		return 2.0
-		
+
 	@classmethod
 	def E_noSupervisor( clse ):
 		"""Absolute energy for a student with no project or supervisor currently assigned."""
@@ -101,32 +101,32 @@ class autoAllocate:
 		#
 		# Sanity check.
 		#
-		
+
 		# All students pinned? Then no point continuing (would hang at start of main loop).
 		if len( [ s for s in students if not s.pinned ] )==0:
 			print( "Cannot change allocation; all students pinned." )
 			return
-		
+
 		# Need non-negative temperatures (allow zero; means only accept decreases in energy).
 		if startT<0.0 or endT<0.0:
 			print( "Both start and temperature must be non-negative." )
 			return
-		
-		
+
+
 		#
 		# Initialise
 		#
 		if numSteps==None:
 			numSteps = len(students)**2
-		
+
 		random.seed()
 		initialE = cls.energy( students, staff, projects )
-		
+
 		#
 		# Main loop.
 		#
 		for step in range(numSteps):
-			
+
 			#
 			# Trial change.
 			#
@@ -135,7 +135,7 @@ class autoAllocate:
 			student = None
 			while student==None or student.pinned:
 				student = random.choice( students )
-			
+
 			# Store old values for calculating the change in energy later.
 			oldIndex = student.assignedIndex
 			if oldIndex != -1:
@@ -156,7 +156,7 @@ class autoAllocate:
 				newStaff = staff.randomStaffName()
 			else:
 				newStaff = staff.staffNameForCode( newCode )
-			
+
 			# Some coees (e.g. for external companies) do not have associated staff. These are ignored and should be
 			# allocated manually prior to calling this method.
 			if newStaff=="<none>": continue
@@ -168,7 +168,7 @@ class autoAllocate:
 			# Do not consider any changes involving a pinned project.
 			if (oldIndex!=-1 and oldProject["pinned"]) or newProject["pinned"]:
 				continue
-			
+
 			# Only consider changing to an OWN project if it has been declared suitable.
 			if newCode=="OWN" and student.suitableOWN != True:
 				continue
@@ -186,9 +186,9 @@ class autoAllocate:
 
 			# Remove penalty if current supervisor is not the proposer.
 			if oldIndex != -1:
-				oldProposer = staff.staffNameForCode(oldCode)					
+				oldProposer = staff.staffNameForCode(oldCode)
 				if oldProposer.casefold()!="<none>".casefold() and oldStaff.casefold()!=oldProposer.casefold():
-					dE -= cls.E_wrongSupervisor()	
+					dE -= cls.E_wrongSupervisor()
 
 			# Apply penalty if new supervisor is not the proposer.
 			newProposer = staff.staffNameForCode(newCode)
@@ -208,16 +208,16 @@ class autoAllocate:
 			if oldIndex != -1:
 				if len(oldProject["allocated"]) > oldProject["max"]:
 					dE -= cls.E_excessStudents()
-			
+
 			# Increase penalty if will start or increase overload for the new project.
 			if len(newProject["allocated"]) >= newProject["max"]:
 				dE += cls.E_excessStudents()
-		
+
 			#
 			# Accept the change?
 			#
 			currentT = startT + (endT-startT) * float(step)/numSteps
-			
+
 			accept = ( True if dE<0.0 else False )
 			if dE>0.0 and dE<30.0*currentT:											# Don't risk overflow for dE>>T when exponentiating.
 				if random.random() < math.exp(-dE/currentT):
@@ -242,7 +242,7 @@ class autoAllocate:
 
 				if project["code"]==newCode:
 					project["allocated"].append( student.username )
-			
+
 			# Swap student from old to new staff member.
 			for member in staff.fullList():
 				if oldIndex != -1:
@@ -251,14 +251,13 @@ class autoAllocate:
 							print( "Could not find student in staff member's supervision list." )
 							return
 						member["supervising"].remove( student.username )
-				
+
 				if member["name"].casefold() == newStaff.casefold():
 					member["supervising"].append( student.username )
-					
-		
+
+
 		#
 		# Finalise and display the change in energy.
 		#
 		finalE = cls.energy( students, staff, projects )
 		print( "Energy changed from {0} to {1}".format(initialE,finalE) )
-
