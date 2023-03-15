@@ -1,9 +1,11 @@
 import pandas as pd
+import random, math
 
 from app import app, db
 from flask import render_template, request, redirect, url_for
 from .models import Student, Staff, Project
-from .stakeholderFunctions import staffForCode,normaliseCode
+from .stakeholderFunctions import staffForCode, normaliseCode
+from .autoAllocation import allocation
 
 @app.route('/home')
 def home():
@@ -34,8 +36,6 @@ def update_students():
         student.code4 = row['code4']
         student.title4 = row['title4']
         student.reason4 = row['reason4']
-        student.allocated_code = row['allocated_code']
-        student.allocated_staff = row['allocated_staff']
         db.session.commit()
     return 'Data updated successfully!'
 
@@ -61,7 +61,8 @@ def refresh_students():
             title4=row[19],
             reason4=row[20],
             allocated_code='0',
-            allocated_staff='blank'
+            allocated_staff='blank',
+            # student.pinned=False
         )
         db.session.add(student)
     db.session.commit()
@@ -153,3 +154,13 @@ def refresh_projects():
     # Commit changes to the database
     db.session.commit()
     return redirect(url_for('projects'))
+
+@app.route("/allocate")
+def allocate():
+    students = Student.query.all()
+    staff = Staff.query.all()
+    projects = Project.query.all()
+
+    students, staff, projects, start_energy, final_energy = allocation(students, staff, projects)
+
+    return render_template('allocationOutput.html', start_energy=start_energy, students=students, final_energy=final_energy)

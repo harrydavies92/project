@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %} Students {% endblock %}
+{% block content %}
+    <h1>Allocation Output</h1>
+    <!-- <p>{{newStudents}}</p> -->
+    <p>{{ start_energy }}</p>
+    <p>{{ student }}</p>
+    <p>{{ final_energy }}</p>
+
+    {% for student in students %}
+    <table>
+      <tr>
+        <td>{{ student.id }}</td>
+        <td contenteditable="true">{{ student.allocated_code}}</td>
+        <td contenteditable="true">{{ student.allocated_preference}}</td>
+      </tr>
+    </table>
+    {% endfor %}
+{% endblock %}
