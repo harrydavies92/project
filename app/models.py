@@ -17,7 +17,7 @@ class Student(db.Model):
     code4 = db.Column(db.String(10))
     title4 = db.Column(db.String(64))
     reason4 = db.Column(db.String(256))
-    allocated_preference = db.Column(db.Integer, default=-1)
+    allocated_preference = db.Column(db.Integer, default=None)
     allocated_code = db.Column(db.String(10), db.ForeignKey('project.code'))
     allocated_staff = db.Column(db.String(64), db.ForeignKey('staff.name'))
     pinned = db.Column(db.Boolean, default=False)

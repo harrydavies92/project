@@ -155,6 +155,47 @@ def refresh_projects():
     db.session.commit()
     return redirect(url_for('projects'))
 
+@app.route('/students/pin')
+def pin_students():
+    students_with_own = []
+    students = Student.query.filter((Student.code1 == 'OWN') | (Student.code2 == 'OWN') | (Student.code3 == 'OWN') | (Student.code4 == 'OWN')).all()
+    for student in students:
+        for i in range(1, 5):
+            code = getattr(student, f"code{i}")
+            if code == 'OWN':
+                title = getattr(student, f"title{i}")
+                reason = getattr(student, f"reason{i}")
+                students_with_own.append((student, title, reason))
+                break
+    staff_members = Staff.query.all()
+    return render_template('pinSelfProposed.html', students=students_with_own, staff_members=staff_members)
+
+
+@app.route('/students/pin/update', methods=['POST'])
+def update_pinned_students():
+    data = request.get_json()
+    for row in data:
+        student = Student.query.filter_by(id=row['id']).first()
+        student.pinned = row['pinned']
+        if row['allocated_staff']:
+            staff = Staff.query.filter_by(name=row['allocated_staff']).first()
+            if staff:
+                if student.allocated_staff != staff.name:
+                    if student.allocated_staff:
+                        old_staff = Staff.query.filter_by(name=student.allocated_staff).first()
+                        if old_staff is not None:
+                            old_staff.current_load -= 1
+                    student.allocated_staff = staff.name
+                    staff.current_load += 1
+        else:
+            if student.allocated_staff:
+                old_staff = Staff.query.filter_by(name=student.allocated_staff).first()
+                if old_staff is not None:
+                    old_staff.current_load -= 1
+            student.allocated_staff = None
+        db.session.commit()
+    return 'Pinned students updated successfully!'
+
 @app.route("/allocate")
 def allocate():
     students = Student.query.all()
@@ -162,5 +203,22 @@ def allocate():
     projects = Project.query.all()
 
     students, staff, projects, start_energy, final_energy = allocation(students, staff, projects)
+
+    # Update the database with the new allocations
+    for student in students:
+        db_student = Student.query.filter_by(id=student.id).first()
+        db_student.allocated_code = student.allocated_code
+        db_student.allocated_staff = student.allocated_staff
+        db_student.allocated_preference = student.allocated_preference
+
+    for staff_member in staff:
+        db_staff = Staff.query.filter_by(id=staff_member.id).first()
+        db_staff.current_load = staff_member.current_load
+
+    for project in projects:
+        db_project = Project.query.filter_by(id=project.id).first()
+        db_project.current_load = project.current_load
+
+    db.session.commit()
 
     return render_template('allocationOutput.html', start_energy=start_energy, students=students, final_energy=final_energy)

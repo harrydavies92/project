@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %} Pin Students {% endblock %}
+{% block content %}
+    <h1>Pin Students</h1>
+    <table id="pin-students-table">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Reason</th>
+        <th>Pin</th>
+        <th>Allocate Staff</th>
+      </tr>
+      {% for student, title, reason in students %}
+      <tr>
+        <td>{{ student.id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ title }}</td>
+        <td>{{ reason }}</td>
+        <td><input type="checkbox" {% if student.pinned %}checked{% endif %}></td>
+        <td>
+          <select>
+            <option value="">-- Select Staff --</option>
+            {% for staff in staff_members %}
+            <option value="{{ staff.name }}" {% if student.allocated_staff == staff.name %}selected{% endif %}>{{ staff.name }}</option>
+            {% endfor %}
+          </select>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button onclick="save()">Save</button>
+    <script>
+    function save() {
+      var table = document.getElementById("pin-students-table");
+      var rows = table.getElementsByTagName("tr");
+      var data = [];
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var cells = row.getElementsByTagName("td");
+        var pinCheckbox = row.getElementsByTagName("input")[0];
+        var staffSelect = row.getElementsByTagName("select")[0];
+        var rowData = {
+          "id": cells[0].textContent,
+          "pinned": pinCheckbox.checked,
+          "allocated_staff": staffSelect.value
+        };
+        data.push(rowData);
+      }
+
+      // Send data to server using AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/students/pin/update", true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          console.log(xhr.responseText);
+        }
+      };
+      xhr.send(JSON.stringify(data));
+    }
+    </script>
+{% endblock %}
