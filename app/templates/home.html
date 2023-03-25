@@ -2,10 +2,12 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
 {% block content %}
-    <h1>Welcome to the homepage</h1>
-    <p>Click one of the buttons below to navigate to a page:</p>
-    <button onclick="window.location='/students'">Students</button>
-    <button onclick="window.location='/staff'">Staff</button>
-    <button onclick="window.location='/projects'">Projects</button>
-    <button onclick="window.location='/allocate'">Allocate</button>
+    <h1>Instructions</h1>
+    <ol class="instructions-list">
+      <li>Firstly, check the <b>student table</b> to ensure the data has been parsed in correctly.</li>
+      <li>Secondly, check the <b>staff table</b> and edit the maximum workload for each staff member.</li>
+      <li>Thirdly, check the <b>project table</b> to edit the maximum project load and verify any changes from the student table.</li>
+      <li>Next, check the <b>self-proposed projects</b> and manually pin the appropriate ones, allocating staff where needed.</li>
+      <li>Finally, go to the <b>allocate page</b>, add in your parameters and run the algorithm.</li>
+    </ol>
 {% endblock %}

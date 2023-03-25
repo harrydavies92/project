@@ -40,6 +40,8 @@
         var cells = row.getElementsByTagName("td");
         var pinCheckbox = row.getElementsByTagName("input")[0];
         var staffSelect = row.getElementsByTagName("select")[0];
+        rowData.allocated_code = pinCheckbox.checked ? 'OWN' : '';
+        rowData.allocated_preference = pinCheckbox.checked ? cells[2].textContent.indexOf('OWN') + 1 : '';
         var rowData = {
           "id": cells[0].textContent,
           "pinned": pinCheckbox.checked,

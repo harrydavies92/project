@@ -1,6 +1,7 @@
 # This code is inspired by the autoAllocate.py in the original stakeholder code, but is rewritten for my own setup
 
 import random, math
+from app import db
 from .stakeholderFunctions import staffForCode
 
 # Defining the global variables
@@ -65,7 +66,7 @@ def allocation(students, staff, projects, startT=2.0, endT=0.01):
 
         # Pick a random student who isn't pinned
         student = None
-        while student == None or student.pinned == False:
+        while student is None or student.pinned:
             student = random.choice(students)
 
         # Store the old allocation for later
@@ -141,7 +142,7 @@ def allocation(students, staff, projects, startT=2.0, endT=0.01):
 
         # Make the change
         student.allocated_code = newCode
-        student.allocated_staff = newStaff
+        student.allocated_staff = newStaff.name
         student.allocated_preference = newPreference
         if oldStaff is not None:
             oldStaff.current_load -= 1
@@ -149,6 +150,13 @@ def allocation(students, staff, projects, startT=2.0, endT=0.01):
         if oldProject is not None:
             oldProject.current_load -= 1
         newProject.current_load += 1
+
+    print(f"student.allocated_code: {student.allocated_code}, type: {type(student.allocated_code)}")
+    print(f"student.allocated_staff: {student.allocated_staff}, type: {type(student.allocated_staff)}")
+    print(f"student.allocated_preference: {student.allocated_preference}, type: {type(student.allocated_preference)}")
+
+    # Commit the changes to the database
+    db.session.commit()
 
     final_energy = calculateEnergy(students, staff, projects)
     return students, staff, projects, start_energy, final_energy
