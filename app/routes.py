@@ -204,13 +204,22 @@ def update_pinned_students():
         db.session.commit()
     return 'Pinned students updated successfully!'
 
-@app.route("/allocate")
+@app.route("/allocate", methods=['POST'])
 def allocate():
+    startT = float(request.form.get('startT'))
+    endT = float(request.form.get('endT'))
+    PREFERENCE_ENERGY = float(request.form.get('PREFERENCE_ENERGY'))
+    STAFF_OVERLOAD_ENERGY = float(request.form.get('STAFF_OVERLOAD_ENERGY'))
+    NO_PROJECT_ENERGY = float(request.form.get('NO_PROJECT_ENERGY'))
+    PROJECT_OVERLOAD_ENERGY = float(request.form.get('PROJECT_OVERLOAD_ENERGY'))
     students = Student.query.all()
     staff = Staff.query.all()
     projects = Project.query.all()
 
-    students, staff, projects, start_energy, final_energy = allocation(students, staff, projects)
+    students, staff, projects, start_energy, final_energy = allocation(
+        students, staff, projects, startT, endT,
+        PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY, time_to_run
+    )
 
     # Update the database with the new allocations
     for student in students:
@@ -230,3 +239,7 @@ def allocate():
     db.session.commit()
 
     return render_template('allocationOutput.html', start_energy=start_energy, students=students, final_energy=final_energy)
+
+@app.route('/allocationInput')
+def allocationInput():
+    return render_template('allocationInput.html')
