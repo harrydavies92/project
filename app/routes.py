@@ -101,7 +101,7 @@ def refresh_staff():
     for code in all_codes:
         if code != "":
             if Staff.query.filter_by(name=code).first() is None:
-                staff_member = Staff(name=code, max_load=10, current_load=0)
+                staff_member = Staff(name=code, max_load=8, current_load=0)
                 db.session.add(staff_member)
                 db.session.commit()
 
@@ -144,16 +144,24 @@ def refresh_projects():
                 all_codes.append(code)
                 all_titles.append(title)
 
+    # Read the max_load values from the datafiles/projectWorkloadColumn.txt file
+    with open('datafiles/projectWorkloadColumn.txt', 'r') as f:
+        max_load_values = [int(line.strip()) for line in f.readlines()]
+
+    print(max_load_values)
+
     # Create a new Project record for each unique code
     for i, code in enumerate(all_codes):
         title = all_titles[i]
+        max_load = max_load_values[i] if i < len(max_load_values) else 0
         popularity = Student.query.filter((Student.code1 == code) | (Student.code2 == code) | (Student.code3 == code) | (Student.code4 == code)).count()
-        project = Project(code=code, title=title, staff_member=staffForCode(code), max_load=0, current_load=0, popularity=popularity)
+        project = Project(code=code, title=title, staff_member=staffForCode(code), max_load=max_load, current_load=0, popularity=popularity)
         db.session.add(project)
 
     # Commit changes to the database
     db.session.commit()
     return redirect(url_for('projects'))
+
 
 @app.route('/students/pin')
 def pin_students():
@@ -218,7 +226,7 @@ def allocate():
 
     students, staff, projects, start_energy, final_energy = allocation(
         students, staff, projects, startT, endT,
-        PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY, time_to_run
+        PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY
     )
 
     # Update the database with the new allocations
@@ -236,9 +244,22 @@ def allocate():
         db_project = Project.query.filter_by(id=project.id).first()
         db_project.current_load = project.current_load
 
+    students_with_own = []
+    possible_students = Student.query.filter((Student.code1 == 'OWN') | (Student.code2 == 'OWN') | (Student.code3 == 'OWN') | (Student.code4 == 'OWN')).all()
+    for student in possible_students:
+        for i in range(1, 5):
+            code = getattr(student, f"code{i}")
+            if code == 'OWN':
+                title = getattr(student, f"title{i}")
+                reason = getattr(student, f"reason{i}")
+                students_with_own.append((student, title, reason))
+                break
+
+    print(students_with_own)
+
     db.session.commit()
 
-    return render_template('allocationOutput.html', start_energy=start_energy, students=students, final_energy=final_energy)
+    return render_template('allocationOutput.html', students=students, staff=staff, projects=projects, students_with_own=students_with_own)
 
 @app.route('/allocationInput')
 def allocationInput():

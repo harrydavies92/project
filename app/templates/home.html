@@ -10,4 +10,27 @@
       <li>Next, check the <b>self-proposed projects</b> and manually pin the appropriate ones, allocating staff where needed.</li>
       <li>Finally, go to the <b>allocate page</b>, add in your parameters and run the algorithm.</li>
     </ol>
+    <button onclick="refreshAllData()">Refresh All Data</button>
+    <script>
+      function refreshAllData() {
+        var endpoints = ['/staff/refresh', '/projects/refresh', '/students/refresh'];
+        var completedRequests = 0;
+
+        endpoints.forEach(function (endpoint) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', endpoint, true);
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              completedRequests++;
+
+              // When all requests have been completed, display a message
+              if (completedRequests === endpoints.length) {
+                alert('All data refreshed successfully!');
+              }
+            }
+          };
+          xhr.send();
+        });
+      }
+    </script>
 {% endblock %}

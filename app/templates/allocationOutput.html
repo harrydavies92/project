@@ -1,20 +1,124 @@
 <!DOCTYPE html>
 {% extends 'base.html' %}
-{% block title %} Students {% endblock %}
+{% block title %} Allocation Output {% endblock %}
 {% block content %}
     <h1>Allocation Output</h1>
-    <!-- <p>{{newStudents}}</p> -->
-    <p>{{ start_energy }}</p>
-    <p>{{ student }}</p>
-    <p>{{ final_energy }}</p>
+    <div id="table-select">
+        <button id="students-button" class="selected" type="button">Students</button>
+        <button id="staff-button" type="button">Staff</button>
+        <button id="projects-button" type="button">Projects</button>
+        <button id="self-proposed-button" type="button">Self-Proposed</button>
+    </div>
 
-    {% for student in students %}
-    <table>
-      <tr>
-        <td>{{ student.id }}</td>
-        <td contenteditable="true">{{ student.allocated_code}}</td>
-        <td contenteditable="true">{{ student.allocated_preference}}</td>
-      </tr>
-    </table>
-    {% endfor %}
+    <div id="students-table">
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Allocated Code</th>
+                <th>Allocated Title</th>
+                <th>Allocated Staff</th>
+                <th>Allocated Preference</th>
+            </tr>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.name }}</td>
+                <td>{{ student.allocated_code }}</td>
+                <td>{{ student.project.title if student.project }}</td>
+                <td>{{ student.allocated_staff }}</td>
+                <td>{{ student.allocated_preference }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div id="staff-table" style="display: none;">
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Max Load</th>
+                <th>Current Load</th>
+                <th>Supervising Students</th>
+                <th>Supervising Projects</th>
+            </tr>
+            {% for staff_member in staff %}
+            <tr>
+                <td>{{ staff_member.name }}</td>
+                <td>{{ staff_member.max_load }}</td>
+                <td>{{ staff_member.current_load }}</td>
+                <td>{% for student in staff_member.students %}{{ student.name }}<br>{% endfor %}</td>
+                <td>{% for project in staff_member.projects %}{{ project.code }}<br>{% endfor %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div id="projects-table" style="display: none;">
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Max Load</th>
+                <th>Current Load</th>
+                <th>Staff Member</th>
+                <th>Assigned Students</th>
+            </tr>
+            {% for project in projects %}
+                {% if project.code != "OWN" %}
+                    <tr>
+                        <td>{{ project.code }}</td>
+                        <td>{{ project.title }}</td>
+                        <td>{{ project.max_load }}</td>
+                        <td>{{ project.current_load }}</td>
+                        <td>{{ project.staff_member }}</td>
+                        <td>{% for student in project.students %}{{ student.name }}<br>{% endfor %}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+
+    <div id="self-proposed-table" style="display: none;">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Reason</th>
+                <th>Staff Member</th>
+            </tr>
+            {% for student, title, reason in students_with_own %}
+                {% if student.allocated_code == "OWN" %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ title }}</td>
+                        <td>{{ reason }}</td>
+                        <td>{{ student.allocated_staff }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    {% block scripts %}
+        <script>
+            function showTable(tableId) {
+                const tableIds = ["students-table", "staff-table", "projects-table", "self-proposed-table"];
+
+                tableIds.forEach((id) => {
+                    const table = document.getElementById(id);
+                    if (id === tableId) {
+                        table.style.display = "block";
+                    } else {
+                        table.style.display = "none";
+                    }
+                });
+            }
+
+            document.getElementById("students-button").addEventListener("click", () => showTable("students-table"));
+            document.getElementById("staff-button").addEventListener("click", () => showTable("staff-table"));
+            document.getElementById("projects-button").addEventListener("click", () => showTable("projects-table"));
+            document.getElementById("self-proposed-button").addEventListener("click", () => showTable("self-proposed-table"));
+        </script>
+    {% endblock %}
+
 {% endblock %}
