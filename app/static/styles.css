@@ -36,6 +36,10 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 20px;
 }
 
+p {
+  margin-left: 20px;
+}
+
 table {
   border-collapse: collapse;
   margin: 20px 0;
@@ -72,4 +76,26 @@ button {
 
 button:hover {
   opacity: 0.8;
+}
+
+.instructions-list {
+  counter-reset: list;
+  padding-left: 0;
+  list-style-type: none;
+  margin-left: 20px;
+}
+
+.instructions-list li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 10px;
+}
+
+.instructions-list li:before {
+  counter-increment: list;
+  content: counter(list) ".";
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+  color: #333;
 }

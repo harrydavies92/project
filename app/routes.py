@@ -177,6 +177,14 @@ def update_pinned_students():
     for row in data:
         student = Student.query.filter_by(id=row['id']).first()
         student.pinned = row['pinned']
+
+        if student.pinned == 1:
+            student.allocated_code = row['allocated_code']
+            student.allocated_preference = row['allocated_preference']
+        else:
+            student.allocated_code = None
+            student.allocated_preference = None
+
         if row['allocated_staff']:
             staff = Staff.query.filter_by(name=row['allocated_staff']).first()
             if staff:
