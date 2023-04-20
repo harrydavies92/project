@@ -2,17 +2,28 @@
 <html>
   <head>
     <title>{% block title %}{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <body>
     <nav>
       <ul>
-        <li><a href="/home">Home</a></li>
-        <li><a href="/students">Students</a></li>
-        <li><a href="/staff">Staff</a></li>
-        <li><a href="/projects">Projects</a></li>
-        <li><a href="/students/pin">Self-Proposed</a></li>
-        <li><a href="/allocationInput">Allocate</a></li>
+        {% if request.path == "/allocationOutput" %}
+          <li><a href="/home">Back to Home</a></li>
+          <li><a href="/allocationOutput">Allocation Output</a></li>
+          <li><a href="/statistics">Statistics</a></li>
+        {% elif request.path == "/statistics" %}
+          <li><a href="/home">Back to Home</a></li>
+          <li><a href="/allocationOutput">Allocation Output</a></li>
+          <li><a href="/statistics">Statistics</a></li>
+        {% else %}
+          <li><a href="/home">Home</a></li>
+          <li><a href="/students">Students</a></li>
+          <li><a href="/staff">Staff</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/students/pin">Self-Proposed</a></li>
+          <li><a href="/allocationInput">Allocate</a></li>
+        {% endif %}
       </ul>
     </nav>
     {% block content %}{% endblock %}

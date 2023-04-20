@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %} Statistics {% endblock %}
+{% block content %}
+    <h1>Allocation Statistics</h1>
+    <canvas id="staffLoadChart"></canvas>
+    <script>
+        // Initialize the chart
+        const ctx = document.getElementById('staffLoadChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [], // This will hold staff names
+                datasets: [{
+                    label: 'Current Load',
+                    data: [], // This will hold staff current load values
+                    backgroundColor: [],
+                    borderColor: [],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fetch staff statistics data
+        fetch('/api/staff_statistics')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(staff => {
+                    chart.data.labels.push(staff.name);
+                    chart.data.datasets[0].data.push(staff.current_load);
+
+                    const color = staff.current_load > staff.max_load ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';
+                    chart.data.datasets[0].backgroundColor.push(color);
+                    chart.data.datasets[0].borderColor.push(color.replace('0.2', '1'));
+                });
+
+                // Update the chart
+                chart.update();
+            });
+    </script>
+{% endblock %}

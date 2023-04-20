@@ -2,7 +2,7 @@ import pandas as pd
 import random, math
 
 from app import app, db
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, jsonify
 from .models import Student, Staff, Project
 from .stakeholderFunctions import staffForCode, normaliseCode
 from .autoAllocation import allocation
@@ -72,7 +72,7 @@ def refresh_students():
 @app.route("/staff")
 def staff():
     staff = Staff.query.all()
-    return render_template('staffTable.html', staff=staff)
+    return render_template('staffTable.html', staff=staff, request=request)
 
 @app.route('/staff/update', methods=['POST'])
 def update_staff():
@@ -110,7 +110,7 @@ def refresh_staff():
 @app.route("/projects")
 def projects():
     projects = Project.query.all()
-    return render_template('projectTable.html', projects=projects)
+    return render_template('projectTable.html', projects=projects, request=request)
 
 @app.route('/projects/update', methods=['POST'])
 def update_projects():
@@ -176,8 +176,14 @@ def pin_students():
                 students_with_own.append((student, title, reason))
                 break
     staff_members = Staff.query.all()
-    return render_template('pinSelfProposed.html', students=students_with_own, staff_members=staff_members)
+    calculate_staff_popularity(staff_members)
+    staff_dicts = [{'name': staff.name, 'max_load': staff.max_load, 'current_load': staff.current_load} for staff in staff_members]
+    return render_template('pinSelfProposed.html', students=students_with_own, staff_members=staff_members, staff_dicts=staff_dicts, request=request)
 
+def calculate_staff_popularity(staff_members):
+    for staff in staff_members:
+        staff.popularity = sum([project.popularity for project in staff.projects.all()])
+    staff_members.sort(key=lambda x: x.popularity)
 
 @app.route('/students/pin/update', methods=['POST'])
 def update_pinned_students():
@@ -244,6 +250,11 @@ def allocate():
         db_project = Project.query.filter_by(id=project.id).first()
         db_project.current_load = project.current_load
 
+    db.session.commit()
+
+    return redirect(url_for('allocation_output'))
+
+def get_students_with_own():
     students_with_own = []
     possible_students = Student.query.filter((Student.code1 == 'OWN') | (Student.code2 == 'OWN') | (Student.code3 == 'OWN') | (Student.code4 == 'OWN')).all()
     for student in possible_students:
@@ -254,13 +265,28 @@ def allocate():
                 reason = getattr(student, f"reason{i}")
                 students_with_own.append((student, title, reason))
                 break
+    return students_with_own
 
-    print(students_with_own)
-
-    db.session.commit()
-
-    return render_template('allocationOutput.html', students=students, staff=staff, projects=projects, students_with_own=students_with_own)
 
 @app.route('/allocationInput')
 def allocationInput():
-    return render_template('allocationInput.html')
+    return render_template('allocationInput.html', request=request)
+
+@app.route("/allocationOutput")
+def allocation_output():
+    students = Student.query.all()
+    staff = Staff.query.all()
+    projects = Project.query.all()
+    students_with_own = get_students_with_own()
+
+    return render_template('allocationOutput.html', students=students, staff=staff, projects=projects, students_with_own=students_with_own, request=request)
+
+@app.route('/statistics')
+def statistics():
+    return render_template('statistics.html', request=request)
+
+@app.route('/api/staff_statistics')
+def api_staff_statistics():
+    staff = Staff.query.all()
+    staff_statistics = [{'name': s.name, 'current_load': s.current_load, 'max_load': s.max_load} for s in staff]
+    return jsonify(staff_statistics)

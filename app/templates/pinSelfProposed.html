@@ -2,6 +2,7 @@
 {% block title %} Pin Students {% endblock %}
 {% block content %}
     <h1>Pin Students</h1>
+    <button onclick="autoPinStudents()">Auto-Pin Students</button>
     <table id="pin-students-table">
       <tr>
         <th>ID</th>
@@ -31,35 +32,59 @@
     </table>
     <button onclick="save()">Save</button>
     <script>
-    function save() {
-      var table = document.getElementById("pin-students-table");
-      var rows = table.getElementsByTagName("tr");
-      var data = [];
-      for (var i = 1; i < rows.length; i++) {
-        var row = rows[i];
-        var cells = row.getElementsByTagName("td");
-        var pinCheckbox = row.getElementsByTagName("input")[0];
-        var staffSelect = row.getElementsByTagName("select")[0];
-        var rowData = {
-          "id": cells[0].textContent,
-          "pinned": pinCheckbox.checked,
-          "allocated_staff": staffSelect.value
-        };
-        rowData.allocated_code = pinCheckbox.checked ? 'OWN' : '';
-        rowData.allocated_preference = pinCheckbox.checked ? cells[2].textContent.indexOf('OWN') + 1 : '';
-        data.push(rowData);
-      }
+      function autoPinStudents() {
+        var table = document.getElementById("pin-students-table");
+        var rows = table.getElementsByTagName("tr");
+        var staff_members = {{ staff_dicts | tojson }};
+        var staffIndex = 0;
 
-      // Send data to server using AJAX
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/students/pin/update", true);
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-          console.log(xhr.responseText);
+        for (var i = 1; i < rows.length; i++) {
+          var row = rows[i];
+          var pinCheckbox = row.getElementsByTagName("input")[0];
+          var staffSelect = row.getElementsByTagName("select")[0];
+
+          pinCheckbox.checked = true;
+          staffSelect.value = staff_members[staffIndex].name;
+
+          var staffMaxLoad = Math.round(staff_members[staffIndex].max_load * 0.75);
+          staff_members[staffIndex].current_load += 1;
+
+          if (staff_members[staffIndex].current_load >= staffMaxLoad) {
+            staffIndex += 1;
+          }
         }
-      };
-      xhr.send(JSON.stringify(data));
-    }
+
+        save();
+      }
+      function save() {
+        var table = document.getElementById("pin-students-table");
+        var rows = table.getElementsByTagName("tr");
+        var data = [];
+        for (var i = 1; i < rows.length; i++) {
+          var row = rows[i];
+          var cells = row.getElementsByTagName("td");
+          var pinCheckbox = row.getElementsByTagName("input")[0];
+          var staffSelect = row.getElementsByTagName("select")[0];
+          var rowData = {
+            "id": cells[0].textContent,
+            "pinned": pinCheckbox.checked,
+            "allocated_staff": staffSelect.value
+          };
+          rowData.allocated_code = pinCheckbox.checked ? 'OWN' : '';
+          rowData.allocated_preference = pinCheckbox.checked ? cells[2].textContent.indexOf('OWN') + 1 : '';
+          data.push(rowData);
+        }
+
+        // Send data to server using AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/students/pin/update", true);
+        xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            console.log(xhr.responseText);
+          }
+        };
+        xhr.send(JSON.stringify(data));
+      }
     </script>
 {% endblock %}

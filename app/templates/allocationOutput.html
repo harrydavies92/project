@@ -20,13 +20,13 @@
                 <th>Allocated Preference</th>
             </tr>
             {% for student in students %}
-            <tr>
-                <td>{{ student.name }}</td>
-                <td>{{ student.allocated_code }}</td>
-                <td>{{ student.project.title if student.project }}</td>
-                <td>{{ student.allocated_staff }}</td>
-                <td>{{ student.allocated_preference }}</td>
-            </tr>
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.allocated_code }}</td>
+                    <td>{{ student.project.title if student.project }}</td>
+                    <td>{{ student.allocated_staff }}</td>
+                    <td>{{ student.allocated_preference }}</td>
+                </tr>
             {% endfor %}
         </table>
     </div>
@@ -41,13 +41,15 @@
                 <th>Supervising Projects</th>
             </tr>
             {% for staff_member in staff %}
-            <tr>
-                <td>{{ staff_member.name }}</td>
-                <td>{{ staff_member.max_load }}</td>
-                <td>{{ staff_member.current_load }}</td>
-                <td>{% for student in staff_member.students %}{{ student.name }}<br>{% endfor %}</td>
-                <td>{% for project in staff_member.projects %}{{ project.code }}<br>{% endfor %}</td>
-            </tr>
+                {% if staff_member.name != "<unknown>" %}
+                    <tr>
+                        <td>{{ staff_member.name }}</td>
+                        <td>{{ staff_member.max_load }}</td>
+                        <td>{{ staff_member.current_load }}</td>
+                        <td>{% for student in staff_member.students %}{{ student.name }}<br>{% endfor %}</td>
+                        <td>{% for project in staff_member.projects %}{{ project.code }}<br>{% endfor %}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
     </div>
