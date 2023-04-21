@@ -25,7 +25,7 @@
                     <td>{{ student.name }}</td>
                     <td>{{ student.allocated_code }}</td>
                     <td>{{ student.project.title if student.project }}</td>
-                    <td>{{ staff_names_for_codes[student.allocated_code] }}</td>
+                    <td>{{ student.allocated_staff }}</td>
                     <td>{{ student.allocated_preference }}</td>
                     <td>
                         <button class="dropdown-btn">▼</button>

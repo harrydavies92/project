@@ -32,6 +32,7 @@
     </table>
     <button onclick="save()">Save</button>
     <script>
+      var studentPreferences = {{ student_preferences | tojson }};
       function autoPinStudents() {
         var table = document.getElementById("pin-students-table");
         var rows = table.getElementsByTagName("tr");
@@ -71,7 +72,20 @@
             "allocated_staff": staffSelect.value
           };
           rowData.allocated_code = pinCheckbox.checked ? 'OWN' : '';
-          rowData.allocated_preference = pinCheckbox.checked ? cells[2].textContent.indexOf('OWN') + 1 : '';
+
+          if (pinCheckbox.checked) {
+              let preferences = studentPreferences[i - 1];
+              for (let prefIndex = 1; prefIndex <= 4; prefIndex++) {
+                  if (preferences[prefIndex - 1] === 'OWN') {
+                      rowData.allocated_preference = prefIndex;
+                      break;
+                  }
+              }
+          } else {
+              rowData.allocated_preference = '';
+          }
+
+          console.log(rowData.allocated_preference)
           data.push(rowData);
         }
 

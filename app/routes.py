@@ -166,19 +166,23 @@ def refresh_projects():
 @app.route('/students/pin')
 def pin_students():
     students_with_own = []
+    student_preferences = []
     students = Student.query.filter((Student.code1 == 'OWN') | (Student.code2 == 'OWN') | (Student.code3 == 'OWN') | (Student.code4 == 'OWN')).all()
     for student in students:
+        preferences = []
         for i in range(1, 5):
             code = getattr(student, f"code{i}")
+            preferences.append(code)
             if code == 'OWN':
                 title = getattr(student, f"title{i}")
                 reason = getattr(student, f"reason{i}")
                 students_with_own.append((student, title, reason))
                 break
+        student_preferences.append(preferences)
     staff_members = Staff.query.all()
     calculate_staff_popularity(staff_members)
     staff_dicts = [{'name': staff.name, 'max_load': staff.max_load, 'current_load': staff.current_load} for staff in staff_members]
-    return render_template('pinSelfProposed.html', students=students_with_own, staff_members=staff_members, staff_dicts=staff_dicts, request=request)
+    return render_template('pinSelfProposed.html', students=students_with_own, student_preferences=student_preferences, staff_members=staff_members, staff_dicts=staff_dicts, request=request)
 
 def calculate_staff_popularity(staff_members):
     for staff in staff_members:
@@ -355,3 +359,16 @@ def api_staff_statistics():
     staff = Staff.query.all()
     staff_statistics = [{'name': s.name, 'current_load': s.current_load, 'max_load': s.max_load} for s in staff]
     return jsonify(staff_statistics)
+
+@app.route('/api/student_preferences')
+def api_student_preferences():
+    students = Student.query.all()
+    preferences_count = [0, 0, 0, 0, 0]  # [1st, 2nd, 3rd, 4th, Not Allocated]
+
+    for student in students:
+        if student.allocated_preference:
+            preferences_count[student.allocated_preference - 1] += 1
+        else:
+            preferences_count[4] += 1
+
+    return jsonify(preferences_count)

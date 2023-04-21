@@ -3,6 +3,7 @@
 {% block content %}
     <h1>Allocation Statistics</h1>
     <canvas id="staffLoadChart"></canvas>
+    <canvas id="studentPreferencesChart"></canvas>
     <script>
         // Initialize the chart
         const ctx = document.getElementById('staffLoadChart').getContext('2d');
@@ -74,5 +75,40 @@
                 // Update the chart
                 chart.update();
             });
+
+        // Initialize the student preferences chart
+        const studentPrefsCtx = document.getElementById('studentPreferencesChart').getContext('2d');
+        const studentPrefsChart = new Chart(studentPrefsCtx, {
+            type: 'pie',
+            data: {
+                labels: ['1st Preference', '2nd Preference', '3rd Preference', '4th Preference', 'Not Allocated'],
+                datasets: [{
+                    data: [], // This will hold the preferences count
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(201, 203, 207, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+
+        // Fetch student preferences data
+        fetch('/api/student_preferences')
+            .then(response => response.json())
+            .then(data => {
+                studentPrefsChart.data.datasets[0].data = data;
+                studentPrefsChart.update();
+        });
     </script>
 {% endblock %}
