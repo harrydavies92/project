@@ -18,14 +18,25 @@
                 <th>Allocated Title</th>
                 <th>Allocated Staff</th>
                 <th>Allocated Preference</th>
+                <th>Change</th>
             </tr>
             {% for student in students %}
-                <tr>
+                <tr data-student-id="{{ student.id }}">
                     <td>{{ student.name }}</td>
                     <td>{{ student.allocated_code }}</td>
                     <td>{{ student.project.title if student.project }}</td>
-                    <td>{{ student.allocated_staff }}</td>
+                    <td>{{ staff_names_for_codes[student.allocated_code] }}</td>
                     <td>{{ student.allocated_preference }}</td>
+                    <td>
+                        <button class="dropdown-btn">▼</button>
+                        <div class="dropdown-content">
+                          {% for pref in range(1, 5) %}
+                              <div class="dropdown-item {% if pref == student.allocated_preference %}allocated-preference{% endif %}" data-pref="{{ pref }}" data-project-code="{{ student['code' ~ pref] }}" data-staff="{{ staff_names_for_codes[student['code' ~ pref]] }}">
+                                  {{ pref }}&emsp;|&emsp;{{ student['code' ~ pref] }} - {{ projects_Dict[student['code' ~ pref]].get('current_load') }}/{{ projects_Dict[student['code' ~ pref]].get('max_load') }}&emsp;|&emsp;{{ staff_names_for_codes[student['code' ~ pref]] }} - {{ staff_Dict[staff_names_for_codes[student['code' ~ pref]]].get('current_load') }}/{{ staff_Dict[staff_names_for_codes[student['code' ~ pref]]].get('max_load') }}
+                              </div>
+                          {% endfor %}
+                        </div>
+                    </td>
                 </tr>
             {% endfor %}
         </table>
@@ -42,7 +53,7 @@
             </tr>
             {% for staff_member in staff %}
                 {% if staff_member.name != "<unknown>" %}
-                    <tr>
+                    <tr data-staff-name="{{ staff_member.name }}">
                         <td>{{ staff_member.name }}</td>
                         <td>{{ staff_member.max_load }}</td>
                         <td>{{ staff_member.current_load }}</td>
@@ -66,7 +77,7 @@
             </tr>
             {% for project in projects %}
                 {% if project.code != "OWN" %}
-                    <tr>
+                  <tr data-project-code="{{ project.code }}">
                         <td>{{ project.code }}</td>
                         <td>{{ project.title }}</td>
                         <td>{{ project.max_load }}</td>
@@ -103,6 +114,31 @@
     </div>
     {% block scripts %}
         <script>
+            const staffNamesForCodes = {{ staff_names_for_codes | tojson }};
+            const projects_Dict = {{ projects_Dict | tojson }};
+            const staff_Dict = {{ staff_Dict | tojson }};
+
+            function updateDropdownContent(row) {
+                const dropdownContent = row.querySelector('.dropdown-content');
+                dropdownContent.querySelectorAll('.dropdown-item').forEach(item => {
+                    const pref = parseInt(item.dataset.pref);
+                    const projectCode = item.dataset.projectCode;
+                    const staffName = item.dataset.staff;
+
+                    // Update allocated preference background color and unclickability
+                    if (row.children[1].textContent === projectCode) {
+                        item.classList.add('allocated-preference');
+                        item.style.pointerEvents = 'none';
+                    } else {
+                        item.classList.remove('allocated-preference');
+                        item.style.pointerEvents = '';
+                    }
+
+                    // Update current_load and max_load for projects and staff
+                    item.innerHTML = `${pref}&emsp;|&emsp;${projectCode} - ${projects_Dict[projectCode].current_load}/${projects_Dict[projectCode].max_load}&emsp;|&emsp;${staffName} - ${staff_Dict[staffName].current_load}/${staff_Dict[staffName].max_load}`;
+                });
+            }
+
             function showTable(tableId) {
                 const tableIds = ["students-table", "staff-table", "projects-table", "self-proposed-table"];
 
@@ -120,6 +156,72 @@
             document.getElementById("staff-button").addEventListener("click", () => showTable("staff-table"));
             document.getElementById("projects-button").addEventListener("click", () => showTable("projects-table"));
             document.getElementById("self-proposed-button").addEventListener("click", () => showTable("self-proposed-table"));
+
+            function updateAllocation(row, studentId, newPref, newProjectCode, newStaff, staff_names_for_codes, projects_Dict, staff_Dict) {
+                $.ajax({
+                    url: '/update_allocation',
+                    type: 'POST',
+                    data: {
+                        student_id: studentId,
+                        new_pref: newPref,
+                        new_project_code: newProjectCode,
+                        new_staff: newStaff
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            row.children[1].textContent = data.allocated_code;
+                            row.children[2].textContent = data.allocated_title;
+                            row.children[3].textContent = data.allocated_staff;
+                            row.children[4].textContent = data.allocated_preference;
+
+                            // // Update staff table
+                            // const staffRow = document.querySelector(`[data-staff-name="${data.prev_staff}"]`);
+                            // staffRow.children[2].textContent = data.prev_staff_current_load;
+                            // const newStaffRow = document.querySelector(`[data-staff-name="${data.new_staff}"]`);
+                            // newStaffRow.children[2].textContent = data.new_staff_current_load;
+                            //
+                            // // Update projects table
+                            // const projectRow = document.querySelector(`[data-project-code="${data.prev_project_code}"]`);
+                            // projectRow.children[3].textContent = data.prev_project_current_load;
+                            // const newProjectRow = document.querySelector(`[data-project-code="${data.new_project_code}"]`);
+                            // newProjectRow.children[3].textContent = data.new_project_current_load;
+
+                            console.log(data)
+                            projects_Dict[data.prev_code].current_load = data.prev_project_current_load;
+                            projects_Dict[data.allocated_code].current_load = data.allocated_project_current_load;
+                            staff_Dict[data.prev_staff].current_load = data.prev_staff_current_load;
+                            staff_Dict[data.allocated_staff].current_load = data.allocated_staff_current_load;
+                        }
+                    }
+                });
+            }
+
+
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const content = event.currentTarget.nextElementSibling;
+                    updateDropdownContent(event.target.closest('tr'));
+                    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('dropdown-item')) {
+                    const row = event.target.closest('tr');
+                    const studentId = row.dataset.studentId;
+                    const newPref = event.target.dataset.pref;
+                    const newProjectCode = event.target.dataset.projectCode;
+                    const newStaff = event.target.dataset.staff;
+                    updateAllocation(event.target.closest('tr'), studentId, newPref, newProjectCode, newStaff, staffNamesForCodes, projects_Dict, staff_Dict);
+                    updateDropdownContent(event.target.closest('tr'));
+                    event.target.closest('.dropdown-content').style.display = 'none';
+                }
+            });
+
+            document.querySelectorAll('tr[data-student-id]').forEach(row => {
+                updateDropdownContent(row);
+            });
+
         </script>
     {% endblock %}
 

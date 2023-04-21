@@ -23,7 +23,7 @@ class Student(db.Model):
     pinned = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
-        return '{}   //   {}   //   {}   //   {}'.format(self.id, self.name, self.username, self.allocated_code)
+        return '{}{}{}{}'.format(self.id, self.name, self.username, self.allocated_code)
 
 class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True)

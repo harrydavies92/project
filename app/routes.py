@@ -279,7 +279,72 @@ def allocation_output():
     projects = Project.query.all()
     students_with_own = get_students_with_own()
 
-    return render_template('allocationOutput.html', students=students, staff=staff, projects=projects, students_with_own=students_with_own, request=request)
+    # Create a dictionary mapping project codes to staff names
+    staff_names_for_codes = {}
+    for project in projects:
+        staff_names_for_codes[project.code] = staffForCode(project.code)
+
+    # Create dictionaries for projects and staff for easier access in the template
+    projects_Dict = {project.code: {'current_load': project.current_load, 'max_load': project.max_load} for project in projects}
+    staff_Dict = {staff_member.name: {'current_load': staff_member.current_load, 'max_load': staff_member.max_load} for staff_member in staff}
+
+    return render_template('allocationOutput.html', students=students, staff=staff, projects=projects, students_with_own=students_with_own, request=request, staff_names_for_codes=staff_names_for_codes, projects_Dict=projects_Dict, staff_Dict=staff_Dict)
+
+@app.template_filter('dynamic_attr')
+def dynamic_attr(obj, attr):
+    return getattr(obj, attr)
+
+@app.route('/update_allocation', methods=['POST'])
+def update_allocation():
+    student_id = request.form.get('student_id', type=int)
+    new_pref = request.form.get('new_pref', type=int)
+    new_project_code = request.form.get('new_project_code')
+    new_staff = request.form.get('new_staff')
+
+    student = Student.query.get(student_id)
+    prev_project_code = student.allocated_code
+    prev_project = Project.query.filter_by(code=prev_project_code).first()
+    new_project = Project.query.filter_by(code=new_project_code).first()
+
+    prev_staff = Staff.query.filter_by(name=student.allocated_staff).first()
+    new_staff_member = Staff.query.filter_by(name=new_staff).first()
+
+    # Update student
+    student.allocated_preference = new_pref
+    student.allocated_code = new_project_code
+    student.allocated_staff = new_staff
+
+    # Update previous staff
+    prev_staff.current_load -= 1
+    # Update new staff
+    new_staff_member.current_load += 1
+
+    # Update previous project
+    prev_project.current_load -= 1
+    # Update new project
+    new_project.current_load += 1
+
+    # Save changes to the database
+    db.session.commit()
+
+    print(prev_staff.name)
+    print(prev_staff)
+
+    return jsonify({
+        'success': True,
+        'allocated_code': new_project_code,
+        'allocated_title': new_project.title,
+        'allocated_staff': new_staff,
+        'allocated_preference': new_pref,
+        'allocated_staff_current_load': new_staff_member.current_load,
+        'allocated_project_current_load': new_project.current_load,
+        'prev_code': prev_project_code,
+        'prev_title': prev_project.title,
+        'prev_staff': prev_staff.name,
+        # 'prev_preference': prev_pref,
+        'prev_staff_current_load': prev_staff.current_load,
+        'prev_project_current_load': prev_project.current_load
+    })
 
 @app.route('/statistics')
 def statistics():

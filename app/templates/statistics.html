@@ -10,18 +10,38 @@
             type: 'bar',
             data: {
                 labels: [], // This will hold staff names
-                datasets: [{
-                    label: 'Current Load',
-                    data: [], // This will hold staff current load values
-                    backgroundColor: [],
-                    borderColor: [],
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: 'Overloaded',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Max Load',
+                        data: [],
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Below Max Load',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
             },
             options: {
                 scales: {
+                    x: {
+                        stacked: true
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        stacked: true
                     }
                 }
             }
@@ -32,12 +52,23 @@
             .then(response => response.json())
             .then(data => {
                 data.forEach(staff => {
-                    chart.data.labels.push(staff.name);
-                    chart.data.datasets[0].data.push(staff.current_load);
+                    if (staff.name !== '<unknown>') {
+                        chart.data.labels.push(staff.name);
 
-                    const color = staff.current_load > staff.max_load ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)';
-                    chart.data.datasets[0].backgroundColor.push(color);
-                    chart.data.datasets[0].borderColor.push(color.replace('0.2', '1'));
+                        if (staff.current_load > staff.max_load) {
+                            chart.data.datasets[0].data.push(staff.current_load);
+                            chart.data.datasets[1].data.push(null);
+                            chart.data.datasets[2].data.push(null);
+                        } else if (staff.current_load === staff.max_load) {
+                            chart.data.datasets[0].data.push(null);
+                            chart.data.datasets[1].data.push(staff.current_load);
+                            chart.data.datasets[2].data.push(null);
+                        } else {
+                            chart.data.datasets[0].data.push(null);
+                            chart.data.datasets[1].data.push(null);
+                            chart.data.datasets[2].data.push(staff.current_load);
+                        }
+                    }
                 });
 
                 // Update the chart
