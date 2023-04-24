@@ -1,8 +1,8 @@
 import pandas as pd
 import random, math
 
-from app import app, db
-from flask import render_template, request, redirect, url_for, jsonify
+from app import app, db, cache
+from flask import render_template, request, redirect, url_for, jsonify, json
 from .models import Student, Staff, Project
 from .stakeholderFunctions import staffForCode, normaliseCode
 from .autoAllocation import allocation
@@ -234,10 +234,12 @@ def allocate():
     staff = Staff.query.all()
     projects = Project.query.all()
 
-    students, staff, projects, start_energy, final_energy = allocation(
+    students, staff, projects, start_energy, final_energy, energy_log = allocation(
         students, staff, projects, startT, endT,
         PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY
     )
+
+    cache.set('energy_log', energy_log, timeout=60*60)
 
     # Update the database with the new allocations
     for student in students:
@@ -351,7 +353,10 @@ def update_allocation():
 
 @app.route('/statistics')
 def statistics():
-    return render_template('statistics.html', request=request)
+    energy_log = cache.get('energy_log') or []
+    print("Energy log:", energy_log)
+    print("Energy log type:", type(energy_log))
+    return render_template('statistics.html', energy_log=json.dumps(energy_log), request=request)
 
 @app.route('/api/staff_statistics')
 def api_staff_statistics():
@@ -385,3 +390,9 @@ def api_project_load_statistics():
         else:
             project_load_statistics[2] += 1
     return jsonify(project_load_statistics)
+
+@app.route('/api/energy_log')
+def api_energy_log():
+    # Assuming you store the energy_log somewhere, for example in a session variable or a database
+    energy_log = session.get('energy_log') or []
+    return jsonify(energy_log)

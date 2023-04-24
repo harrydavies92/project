@@ -56,6 +56,9 @@ def allocation(students, staff, projects, startT, endT, PREFERENCE_ENERGY, STAFF
     # Loops through an allocation process a large number of times, relative to the number of students
     numSteps = len(students)**2
 
+    # Add energy log to track energy as we go along
+    energy_log = []
+
     for step in range(numSteps):
 
         # Pick a random student who isn't pinned
@@ -120,7 +123,7 @@ def allocation(students, staff, projects, startT, endT, PREFERENCE_ENERGY, STAFF
                 if (oldProject.max_load - oldProject.current_load) <= 0:
                     d_energy -= PROJECT_OVERLOAD_ENERGY * oldProject.max_load
 
-        # Increae penalty if this change starts or increases a project overload
+        # Increase penalty if this change starts or increases a project overload
         if (newProject.max_load - newProject.current_load) < 0:
             d_energy += PROJECT_OVERLOAD_ENERGY * newProject.max_load
 
@@ -145,8 +148,10 @@ def allocation(students, staff, projects, startT, endT, PREFERENCE_ENERGY, STAFF
             oldProject.current_load -= 1
         newProject.current_load += 1
 
+        energy_log.append(calculateEnergy(students, staff, projects, PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY))
+
     # Commit the changes to the database
     db.session.commit()
 
     final_energy = calculateEnergy(students, staff, projects, PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY)
-    return students, staff, projects, start_energy, final_energy
+    return students, staff, projects, start_energy, final_energy, energy_log

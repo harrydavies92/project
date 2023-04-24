@@ -43,8 +43,14 @@
         <h2>Staff Load</h2>
         <canvas id="staffLoadChart"></canvas>
     </div>
+    <div style="flex-basis: 49%; margin-bottom: 20px;">
+        <h2>Energy Convergence</h2>
+        <canvas id="energyConvergenceChart"></canvas>
+    </div>
+
 
     <script>
+        var energy_log_data = {{ energy_log|safe }};
         // Initialize the chart
         const ctx = document.getElementById('staffLoadChart').getContext('2d');
         const chart = new Chart(ctx, {
@@ -221,6 +227,48 @@
             updateCardContent('overloaded-staff', (overloadedStaff / totalStaff) * 100);
           });
 
+      </script>
+      {% if energy_log %}
+          <script>
+            console.log("Energy log data:", energy_log_data);
 
-    </script>
+            // Initialize the energy convergence chart
+            const energyConvergenceCtx = document.getElementById('energyConvergenceChart').getContext('2d');
+            const energyConvergenceChart = new Chart(energyConvergenceCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: energy_log_data.length}, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Energy',
+                        data: energy_log_data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false,
+                        pointRadius: 0,
+                        lineTension: 0
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Steps'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Energy'
+                            }
+                        }
+                    }
+                }
+            });
+          </script>
+      {% else %}
+          <p>Energy log data is not available. Please perform an allocation to generate energy log data.</p>
+      {% endif %}
+
 {% endblock %}
