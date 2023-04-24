@@ -174,19 +174,18 @@
                             row.children[3].textContent = data.allocated_staff;
                             row.children[4].textContent = data.allocated_preference;
 
-                            // // Update staff table
-                            // const staffRow = document.querySelector(`[data-staff-name="${data.prev_staff}"]`);
-                            // staffRow.children[2].textContent = data.prev_staff_current_load;
-                            // const newStaffRow = document.querySelector(`[data-staff-name="${data.new_staff}"]`);
-                            // newStaffRow.children[2].textContent = data.new_staff_current_load;
-                            //
-                            // // Update projects table
-                            // const projectRow = document.querySelector(`[data-project-code="${data.prev_project_code}"]`);
-                            // projectRow.children[3].textContent = data.prev_project_current_load;
-                            // const newProjectRow = document.querySelector(`[data-project-code="${data.new_project_code}"]`);
-                            // newProjectRow.children[3].textContent = data.new_project_current_load;
+                            // Update staff table
+                            const staffRow = document.querySelector(`[data-staff-name="${data.prev_staff}"]`);
+                            staffRow.children[2].textContent = data.prev_staff_current_load;
+                            const newStaffRow = document.querySelector(`[data-staff-name="${data.new_staff}"]`);
+                            newStaffRow.children[2].textContent = data.new_staff_current_load;
 
-                            console.log(data)
+                            // Update projects table
+                            const projectRow = document.querySelector(`[data-project-code="${data.prev_project_code}"]`);
+                            projectRow.children[3].textContent = data.prev_project_current_load;
+                            const newProjectRow = document.querySelector(`[data-project-code="${data.new_project_code}"]`);
+                            newProjectRow.children[3].textContent = data.new_project_current_load;
+
                             projects_Dict[data.prev_code].current_load = data.prev_project_current_load;
                             projects_Dict[data.allocated_code].current_load = data.allocated_project_current_load;
                             staff_Dict[data.prev_staff].current_load = data.prev_staff_current_load;

@@ -3,6 +3,8 @@
 {% block title %} Students {% endblock %}
 {% block content %}
     <h1>Students</h1>
+    <button onclick="save()">Save</button>
+    <button onclick="window.location='/students/refresh'">Refresh</button>
     <table id="students-table">
       <tr>
         <th>ID</th>
@@ -35,7 +37,7 @@
       </tr>
       {% endfor %}
     </table>
-    <button onclick="save()">Save</button>
+
     <script>
     function save() {
       var table = document.getElementById("students-table");
@@ -73,5 +75,4 @@
       xhr.send(JSON.stringify(data));
     }
     </script>
-    <button onclick="window.location='/students/refresh'">Refresh</button>
 {% endblock %}

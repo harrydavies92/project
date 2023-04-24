@@ -4,12 +4,6 @@ import random, math
 from app import db
 from .stakeholderFunctions import staffForCode
 
-# Defining the global variables
-# PREFERENCE_ENERGY = 0.25 # energy for each preference allocated below their first
-# STAFF_OVERLOAD_ENERGY = 30 # energy for staff being assigned too many students, relative to their maximum load
-# NO_PROJECT_ENERGY = 5 # energy for a student not being allocated a project at all
-# PROJECT_OVERLOAD_ENERGY = 100 # energy for a project being assigned too many students
-
 # Calculates the energy of the current allocation
 def calculateEnergy(students, staff, projects, PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY):
 

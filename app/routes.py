@@ -345,7 +345,6 @@ def update_allocation():
         'prev_code': prev_project_code,
         'prev_title': prev_project.title,
         'prev_staff': prev_staff.name,
-        # 'prev_preference': prev_pref,
         'prev_staff_current_load': prev_staff.current_load,
         'prev_project_current_load': prev_project.current_load
     })
@@ -372,3 +371,17 @@ def api_student_preferences():
             preferences_count[4] += 1
 
     return jsonify(preferences_count)
+
+@app.route('/api/project_load_statistics')
+def api_project_load_statistics():
+    projects = Project.query.all()
+    project_load_statistics = [0, 0, 0]  # [Overloaded, Max Load, Below Max Load]
+
+    for project in projects:
+        if project.current_load > project.max_load:
+            project_load_statistics[0] += 1
+        elif project.current_load == project.max_load:
+            project_load_statistics[1] += 1
+        else:
+            project_load_statistics[2] += 1
+    return jsonify(project_load_statistics)

@@ -2,15 +2,55 @@
 {% block title %} Statistics {% endblock %}
 {% block content %}
     <h1>Allocation Statistics</h1>
-    <canvas id="staffLoadChart"></canvas>
-    <canvas id="studentPreferencesChart"></canvas>
+    <div class="stats-cards">
+        <div class="card" id="unallocated-students">
+            <div class="card-content">
+                <h3>Unallocated Students</h3>
+                <span class="percentage"><p></p></span>
+            </div>
+        </div>
+        <div class="card" id="first-preference">
+            <div class="card-content">
+                <h3>1st Preference</h3>
+                <span class="percentage"><p></p></span>
+            </div>
+        </div>
+        <div class="card" id="overloaded-projects">
+            <div class="card-content">
+                <h3>Overloaded Projects</h3>
+                <span class="percentage"><p></p></span>
+            </div>
+        </div>
+        <div class="card" id="overloaded-staff">
+            <div class="card-content">
+                <h3>Overloaded Staff</h3>
+                <span class="percentage"><p></p></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div style="flex-basis: 49%; margin-bottom: 20px;">
+            <h2>Student Preferences</h2>
+            <canvas id="studentPreferencesChart"></canvas>
+        </div>
+        <div style="flex-basis: 49%; margin-bottom: 20px;">
+            <h2>Project Load</h2>
+            <canvas id="projectLoadChart"></canvas>
+        </div>
+    </div>
+    <div style="flex-basis: 49%; margin-bottom: 20px;">
+        <h2>Staff Load</h2>
+        <canvas id="staffLoadChart"></canvas>
+    </div>
+
     <script>
         // Initialize the chart
         const ctx = document.getElementById('staffLoadChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: [], // This will hold staff names
+                labels: [],
                 datasets: [
                     {
                         label: 'Overloaded',
@@ -83,7 +123,7 @@
             data: {
                 labels: ['1st Preference', '2nd Preference', '3rd Preference', '4th Preference', 'Not Allocated'],
                 datasets: [{
-                    data: [], // This will hold the preferences count
+                    data: [],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(255, 206, 86, 0.2)',
@@ -98,7 +138,11 @@
                         'rgba(153, 102, 255, 1)',
                         'rgba(201, 203, 207, 1)'
                     ],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
                 }]
             }
         });
@@ -110,5 +154,73 @@
                 studentPrefsChart.data.datasets[0].data = data;
                 studentPrefsChart.update();
         });
+
+        // Initialize the project load chart
+        const projectLoadCtx = document.getElementById('projectLoadChart').getContext('2d');
+        const projectLoadChart = new Chart(projectLoadCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Overloaded', 'Max Load', 'Below Max Load'],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                }]
+            }
+        });
+
+        // Fetch project load data
+        fetch('/api/project_load_statistics')
+            .then(response => response.json())
+            .then(data => {
+                projectLoadChart.data.datasets[0].data = data;
+                projectLoadChart.update();
+        });
+
+        // Update card content
+        function updateCardContent(cardId, percentage) {
+          const card = document.getElementById(cardId);
+          const percentageText = percentage.toFixed(1) + '%';
+          card.querySelector('p').textContent = percentageText;
+        }
+
+        // Fetch and update card data
+        fetch('/api/student_preferences')
+          .then((response) => response.json())
+          .then((data) => {
+            const totalStudents = data.reduce((a, b) => a + b, 0);
+            updateCardContent('unallocated-students', (data[4] / totalStudents) * 100);
+            updateCardContent('first-preference', (data[0] / totalStudents) * 100);
+          });
+
+        fetch('/api/project_load_statistics')
+          .then((response) => response.json())
+          .then((data) => {
+            const totalProjects = data.reduce((a, b) => a + b, 0);
+            updateCardContent('overloaded-projects', (data[0] / totalProjects) * 100);
+          });
+
+        fetch('/api/staff_statistics')
+          .then((response) => response.json())
+          .then((data) => {
+            const totalStaff = data.length;
+            const overloadedStaff = data.filter(staff => staff.current_load > staff.max_load).length;
+            updateCardContent('overloaded-staff', (overloadedStaff / totalStaff) * 100);
+          });
+
+
     </script>
 {% endblock %}
