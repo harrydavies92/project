@@ -4,9 +4,9 @@
     <h2>Allocation Input</h2>
     <form action="/allocate" method="post">
         <label for="startT">Start Temperature:</label>
-        <input type="number" id="startT" name="startT" step="0.01" min="0" value="2.0" required><br><br>
+        <input type="number" id="startT" name="startT" step="0.0001" min="0" value="2.0" required><br><br>
         <label for="endT">End Temperature:</label>
-        <input type="number" id="endT" name="endT" step="0.01" min="0" value="0.01" required><br><br>
+        <input type="number" id="endT" name="endT" step="0.0001" min="0" value="0.01" required><br><br>
         <label for="PREFERENCE_ENERGY">Penalty for every preference below first:</label>
         <input type="number" id="PREFERENCE_ENERGY" name="PREFERENCE_ENERGY" step="0.01" min="0" value="0.25" required><br><br>
         <label for="STAFF_OVERLOAD_ENERGY">Penalty for a staff overload:</label>

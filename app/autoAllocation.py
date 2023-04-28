@@ -148,7 +148,7 @@ def allocation(students, staff, projects, startT, endT, PREFERENCE_ENERGY, STAFF
             oldProject.current_load -= 1
         newProject.current_load += 1
 
-        energy_log.append(calculateEnergy(students, staff, projects, PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY))
+        # energy_log.append(calculateEnergy(students, staff, projects, PREFERENCE_ENERGY, STAFF_OVERLOAD_ENERGY, NO_PROJECT_ENERGY, PROJECT_OVERLOAD_ENERGY))
 
     # Commit the changes to the database
     db.session.commit()
